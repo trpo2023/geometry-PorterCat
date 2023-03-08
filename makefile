@@ -1,8 +1,8 @@
-all: main
+all: geometry
 
-make: main.c
-	gcc -o -Wall -Werror main main.c
+make: geometry.c
+	gcc -o -Wall -Werror geometry geometry.c
 run: 
-	./main
+	./geometry example.wkt
 clear:
-	rm main
+	rm geometry
