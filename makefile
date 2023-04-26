@@ -6,3 +6,4 @@ run:
 	./main example.wkt
 clear:
 	rm main
+	
