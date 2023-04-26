@@ -1,251 +1,281 @@
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-int main()
+
+int checkCircleNum(char* line, int n_line)
 {
-    FILE* file1;
-    FILE* file;
 
-    file1 = fopen("geometry.wkt", "r");
+    //Проверяем точки центра
+    line = realloc(line, (strlen(line) + 1) * sizeof(char));
+    line[strlen(line) + 1] = '\n';
 
-    if (!file1) {
-        printf("Error: cannot open file. Check name of file\n");
-    }
+    int commas = 0;
+    int center_digits = 0, radius_digits = 0;
+    int flag_comma = 0;
+    int i = -1;
+    //Проверяем корректность ввода координат центра
 
-    int i, ind_open_bracket = 0, ind_close_bracket = 0, ind_last_num_elm = 0,
-           ind_first_num_elm = 0, ind_second_num_elm = 0;
-    int length = 0, count = 0, element = 0, error = 0, dotcount1  = 0, minuscount1 =0;
+    i = 0;
 
-    while (1) 
+    while(line[i] != '\n')
+    {
+        if(isalpha(line[i]))
         {
-        element = fgetc(file1);
-        if (element == EOF) 
-        {
-        if (feof(file1) != 0) 
-        {
-        break;
+            return 0;
         }
-        }
-        count++;
-        }
-        length = count;
-        fclose(file1);
 
-        char a[length], b[6] = "circle";
-        file = fopen("geometry.txt", "r");
-        while (fgets(a, length + 1, file)) {
-        printf("%s", a);
+        if(isblank(line[i]))
+        {
+            i++;
+            continue;
+        }
 
-        // check circle
-        for (i = 0; i < 7; i++) {
-        if (a[i] != b[i] && i < 6) 
+        if(line[i] == ',')
         {
-        printf("Error : expected 'circle'\n");
-	error = 1;
-	break;
-        }           
-        ind_open_bracket = i;
+            commas++;
+            i++;
+            flag_comma = 1;
+            continue;
         }
-	
-        // check (
-        if (error == 0)
-        {
-        if(a[ind_open_bracket] != '(')
-        {
-        error = 1;
-        printf("Error: expected '<(>'\n");
-        }
-        }
-        
-        // check first number
-        if (error == 0)
-        {
-        if(a[ind_open_bracket+1] == '-'){
-        minuscount1 += 1;
-        }
-        for (i = ind_open_bracket + 1; a[i] != ' ';i++)
-        {
-        if (error == 0)
-        {
-        if(a[i+1] == '-'){
-        minuscount1 += 1;
-        }
-        if(minuscount1 >= 2){
-        error = 1;
-        printf("Error: expected one minus in first number\n");
-        break;
-        }
-        if(isdigit(a[i]) == 0 && a[i] != '.' && a[ind_open_bracket+1] != '-'){
-        error = 1;
-        printf("Error: expected first number\n");
-        break;
-        }
-        if(a[i]=='.'){
-        dotcount1 += 1;
-        }
-        if(dotcount1 >= 2){
-        error = 1;
-        printf("Error: expected one dot in first number\n");
-        break;
-        }
-        }
-        }
-        dotcount1 = 0;
-        minuscount1 = 0;
-        ind_first_num_elm = i;
-        }
-        
-        //check first gap
-        if(error==0){
-        if(a[ind_first_num_elm] !=' '){
-	error = 1;
-	printf("Error: expected ' ' after first number\n");
-	}
-	}
-	
-        // check second number
-        if (error == 0)
-        {
-        if(a[ind_first_num_elm+ 1] == '-'){
-        minuscount1 += 1;
-        }
-        for (i = ind_first_num_elm + 1; a[i] != ',';i++)
-        {
-        if (error == 0)
-        {
-        if(a[i]==' '){
-        error = 1;
-        printf("Error: expected ',' after second number");
-        }
-        if(a[i+1] == '-'){
-        minuscount1 += 1;
-        }
-        if(minuscount1 >= 2){
-        error = 1;
-        printf("Error: expected one minus**\n");
-        break;
-        }
-        if(isdigit(a[i]) == 0 && a[i] != '.' && a[ind_first_num_elm+ 1] != '-'){
-        error = 1;
-        printf("Error: expected number**\n");
-        break;
-        }
-        if(a[i]=='.'){
-        dotcount1 += 1;
-        }
-        if(dotcount1 >= 2){
-        error = 1;
-        printf("Error: expected one dot**\n");
-        break;
-        }
-        }
-        }
-        dotcount1 = 0;
-        minuscount1 = 0;
-        ind_second_num_elm = i;
-        }
-        
-        
-        //check ,
-        if(error==0){
-        if(a[ind_second_num_elm] !=','){
-	error = 1;
-	printf("Error: expected ','\n");
-	}
-	}
-	
-	//check second gap
-	if(error==0){
-        if(a[ind_second_num_elm+1] !=' '){
-	error = 1;
-	printf("Error: expected ' ' after ','\n");
-	}
-	}
-	
-	// find index of ')' token
-        for (i = 0; i < length; i++) 
-        {
-        if(error == 0)
-        {
-        if (a[i] == ')') 
-        {
-        ind_close_bracket = i;
-        }
-        else{
-        ind_close_bracket = length - 1;
-        } 
-        }
-        }
-        
-        // check last number
-        if (error == 0)
-        {
-        if(a[ind_second_num_elm + 2] == '-'){
-        minuscount1 += 1;
-        }
-        for (i = ind_second_num_elm + 2; i < ind_close_bracket; i++)
-        {
-        if (error == 0)
-        {
-        if(a[i+1] == '-'){
-        minuscount1 += 1;
-        }
-        if(a[i]==')'){
-        //printf("GITLERKAPUT\nGITLERKAPUT\n");
-        break;
-        }
-        if(minuscount1 >= 2){
-        error = 1;
-        printf("Error: expected one minus*****\n");
-        break;
-        }
-        if(isdigit(a[i]) == 0 && a[i] != '.' && a[ind_second_num_elm + 2] != '-' && a[i] != ')'){
-        error = 1;
-        printf("Error: expected number******\n");
-        break;
-        }
-        if(a[i]=='.'){
-        dotcount1 += 1;
-        }
-        if(dotcount1 >= 2){
-        error = 1;
-        printf("Error: expected one dot*****\n");
-        break;
-        }
-        }
-        }
-        dotcount1 = 0;
-        minuscount1 = 0;
-        ind_last_num_elm = i;
-        }
-	
-        // check unexpected tokens
-        for (i = ind_last_num_elm + 1; i < length; i++) {
-            if (error == 0) {
-                if (a[i] == '\n') {
-                    break;
-                }
 
-                if (a[i] != ' ') {
-                    error = 1;
-                    printf("Error: unexpected token\n");
-                    break;
-                }
-            } else {
-                break;
+        if(line[i] == '-')
+        {
+            if(flag_comma)
+            {
+                return 0;
             }
-        }
-        
-        
 
-        if (error == 0) {
-            printf("No Errors! GOOD JOB<3\n");
+            if(!(isdigit(line[i+1])))
+            {
+                return 0;
+            }
+            i++;
+            continue;
         }
 
-        error = 0;
-        printf("\n");
+        if(isdigit(line[i]))
+        {
+            if(flag_comma)
+            {
+                radius_digits++;
+            }
+            else
+            {
+                center_digits++;
+            }
+            while(isdigit(line[i]))
+            {
+                i++;
+            }
+            continue;
+        }
+
+        i++;
     }
-    return 0;
+
+    //For circle
+    if(center_digits != 2 || radius_digits != 1 || commas != 1)
+    {
+        return 0;
+    }
+
+    return 1;
 }
+
+// checkNumber(char* string, int n_line)
+// {
+//     if (!(strcmp(string, "circle")))
+//     {
+//         checkCircleNum(line, n_line);
+//     }
+//     if (!(strcmp(string, "triangle")))
+//     {
+//         //
+//     }
+//     if (!(strcmp(string, "polygon")))
+//     {
+//         //
+//     }
+
+// }
+
+void structLetters(char* line)
+{
+    for(int i = 0; i < strlen(line); i++)
+    {
+        if(isupper(line[i]))
+        {   
+            line[i] = tolower(line[i]);
+        }
+    }
+}
+
+int figureNameCheck(char* string, int n_line, char** structs) //проверяем название фигур
+{
+
+    int flag_founded = 0;
+    for(int i = 0; i < 4; i++)
+    {
+        if(!(strcmp(structs[i], string)))
+        {
+            flag_founded = 1;
+            break;
+        }
+    }
+
+    if(!(flag_founded))
+    {
+        printf("[%d line]: ERROR! Syntaxis problem: %s\n", n_line, string);
+        return 0;
+    }
+
+    return 1;
+
+}
+
+int checkLine(char* line, int n_line)
+{
+    char* structs[4] = {
+        "circle", "triangle", "polygon", "point"
+    };
+
+    int length = strlen(line);
+    int pointer = 0;
+    int flag_a = 0;
+    int n_word = 0;
+    int o_brackets = 0, c_brackets = 0;
+    char* buffer = (char*)malloc(2);
+    for(int j = 0; line[pointer] != '(' ; pointer++)
+    {   
+        if(!(isblank(line[pointer])))
+        {
+            if(!flag_a)
+            {
+                n_word++;
+                flag_a = 1;
+            }
+            buffer[j] = line[pointer];
+            buffer = (char*)realloc(buffer, 2*(j + 1));
+            buffer[2*(j+1)] = '\0';
+            j++;
+        }
+        else
+        {
+            flag_a = 0;
+        }
+
+        if(line[pointer] == '\0' || line[pointer] == '\n')
+        {
+            
+            printf("[%d line]: ERROR! Expected \'(\': %s", n_line, line);
+            free(buffer);
+            return 0;
+        }
+    }
+
+    if(n_word == 0)
+    {
+        printf("[%d line]: ERROR! No struct: %s", n_line, line);
+        free(buffer);
+        return 0;
+    }
+
+    if(n_word != 1)
+    {
+        printf("[%d line]: ERROR! Too many structs or there is extra space between letters: %s", n_line, line);
+        free(buffer);
+        return 0;
+    }
+
+
+    structLetters(buffer); //регистр
+
+    if(!(figureNameCheck(buffer, n_line, structs)))
+    {
+        free(buffer);  
+        return 0;
+    }
+ 
+
+    
+    for(int j = 0; (line[pointer] != '\n'); pointer++)
+    {
+        if(line[pointer] == '\0')
+        {
+            break;
+        }
+
+        if(line[pointer] == '(')
+        {
+            o_brackets++;
+            continue;
+        }
+
+        if(line[pointer] == ')')
+        {
+            c_brackets++;
+            continue;
+        }
+
+        buffer[j] = line[pointer];
+        j++;
+
+    }
+
+
+    if(c_brackets != o_brackets)
+    {
+        printf("[%d line]: ERROR! Lost \'(\' or \')\': %s", n_line, line);
+        free(buffer);
+        return 0;
+    }
+
+    if(!(checkCircleNum(buffer, n_line)))
+    {
+        printf("[%d line]: ERROR! Parametr problem: %s", n_line, line);
+        free(buffer);
+        return 0;
+    }
+
+    free(buffer);
+    return 1;
+}
+
+
+
+
+int main(int argc, char* argv[])
+{
+
+    if (argc != 2) {
+        printf("You have not entered the FILE\n");
+        return 1;
+    }
+
+    FILE* file;
+    file = fopen(argv[1], "r");
+
+    if (file == NULL) {
+        printf("Couldn't open the FILE\n");
+        return 2;
+    }
+    int n_line = 0;
+    char line[256];
+    while((fgets(line, 256, file))!=NULL)
+    {
+        n_line ++;
+        if(!(checkLine(line, n_line)))
+        {
+
+        }
+        else 
+        {
+            printf("[%d line]: Everyting is okay\n", n_line);
+        }
+
+    }
+
+    fclose(file);
+  }
