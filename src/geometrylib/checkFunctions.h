@@ -6,7 +6,7 @@
 #include <math.h>
 
 
-int checkCircleNum(char* line, int n_line)
+int checkCircleNum(char* line)
 {
 
     //Проверяем точки центра
@@ -104,7 +104,7 @@ int checkCircleNum(char* line, int n_line)
 
 void structLetters(char* line)
 {
-    for(int i = 0; i < strlen(line); i++)
+    for(size_t i = 0; i < strlen(line); i++)
     {
         if(isupper(line[i]))
         {   
@@ -142,7 +142,6 @@ int checkLine(char* line, int n_line)
         "circle", "triangle"
     };
 
-    int length = strlen(line);
     int pointer = 0;
     int flag_a = 0;
     int n_word = 0;
@@ -233,7 +232,7 @@ int checkLine(char* line, int n_line)
         return 0;
     }
 
-    if(!(checkCircleNum(buffer, n_line)))
+    if(!(checkCircleNum(buffer)))
     {
         printf("[%d line]: ERROR! Parametr problem: %s\n", n_line, line);
         free(buffer);
