@@ -1,281 +1,266 @@
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include "try.h"
 
 
-int checkCircleNum(char* line, int n_line)
+float circle_per(float radius)
 {
-
-    //Проверяем точки центра
-    line = realloc(line, (strlen(line) + 1) * sizeof(char));
-    line[strlen(line) + 1] = '\n';
-
-    int commas = 0;
-    int center_digits = 0, radius_digits = 0;
-    int flag_comma = 0;
-    int i = -1;
-    //Проверяем корректность ввода координат центра
-
-    i = 0;
-
-    while(line[i] != '\n')
-    {
-        if(isalpha(line[i]))
-        {
-            return 0;
-        }
-
-        if(isblank(line[i]))
-        {
-            i++;
-            continue;
-        }
-
-        if(line[i] == ',')
-        {
-            commas++;
-            i++;
-            flag_comma = 1;
-            continue;
-        }
-
-        if(line[i] == '-')
-        {
-            if(flag_comma)
-            {
-                return 0;
-            }
-
-            if(!(isdigit(line[i+1])))
-            {
-                return 0;
-            }
-            i++;
-            continue;
-        }
-
-        if(isdigit(line[i]))
-        {
-            if(flag_comma)
-            {
-                radius_digits++;
-            }
-            else
-            {
-                center_digits++;
-            }
-            while(isdigit(line[i]))
-            {
-                i++;
-            }
-            continue;
-        }
-
-        i++;
-    }
-
-    //For circle
-    if(center_digits != 2 || radius_digits != 1 || commas != 1)
-    {
-        return 0;
-    }
-
-    return 1;
+    return 2 * M_PI * radius;
 }
 
-// checkNumber(char* string, int n_line)
-// {
-//     if (!(strcmp(string, "circle")))
-//     {
-//         checkCircleNum(line, n_line);
-//     }
-//     if (!(strcmp(string, "triangle")))
-//     {
-//         //
-//     }
-//     if (!(strcmp(string, "polygon")))
-//     {
-//         //
-//     }
-
-// }
-
-void structLetters(char* line)
+float circle_square(float radius)
 {
-    for(int i = 0; i < strlen(line); i++)
-    {
-        if(isupper(line[i]))
-        {   
-            line[i] = tolower(line[i]);
-        }
-    }
+    return M_PI * pow(radius, 2);
 }
 
-int figureNameCheck(char* string, int n_line, char** structs) //проверяем название фигур
+float polygon_tri_per(double** point, int n) //Count perimetr of triangle figure
 {
+    float sum = 0;
 
-    int flag_founded = 0;
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < n; i++)
     {
-        if(!(strcmp(structs[i], string)))
+        if(i == n-1 )
         {
-            flag_founded = 1;
-            break;
+            sum += sqrt(pow(point[i][0] - point[0][0], 2) + pow(point[i][1] - point[0][1], 2));
+        } 
+        else 
+        {
+            sum += sqrt(pow(point[i][0] - point[i+1][0], 2) + pow(point[i][1] - point[i+1][1], 2));
         }
     }
 
-    if(!(flag_founded))
-    {
-        printf("[%d line]: ERROR! Syntaxis problem: %s\n", n_line, string);
-        return 0;
-    }
-
-    return 1;
-
+    return sum;
 }
 
-int checkLine(char* line, int n_line)
+float polygon_tri_square(double** point, int n) //Count square of triangle figure
 {
-    char* structs[4] = {
-        "circle", "triangle", "polygon", "point"
-    };
-
-    int length = strlen(line);
-    int pointer = 0;
-    int flag_a = 0;
-    int n_word = 0;
-    int o_brackets = 0, c_brackets = 0;
-    char* buffer = (char*)malloc(2);
-    for(int j = 0; line[pointer] != '(' ; pointer++)
-    {   
-        if(!(isblank(line[pointer])))
+    float sum = 0;
+    
+    //Алгоритм шнурования
+    for(int i = 0; i < n; i++)
+    {
+        if(i != n-1)
         {
-            if(!flag_a)
-            {
-                n_word++;
-                flag_a = 1;
-            }
-            buffer[j] = line[pointer];
-            buffer = (char*)realloc(buffer, 2*(j + 1));
-            buffer[2*(j+1)] = '\0';
-            j++;
+            sum += point[i][0] * point[i+1][1];
         }
         else
         {
-            flag_a = 0;
+            sum += point[i][0] * point[0][1];
         }
+    }
 
-        if(line[pointer] == '\0' || line[pointer] == '\n')
+    for(int i = 0; i < n; i++)
+    {
+        if(i != n-1)
         {
-            
-            printf("[%d line]: ERROR! Expected \'(\': %s", n_line, line);
-            free(buffer);
-            return 0;
+            sum -= point[i][1] * point[i+1][0];
         }
-    }
-
-    if(n_word == 0)
-    {
-        printf("[%d line]: ERROR! No struct: %s", n_line, line);
-        free(buffer);
-        return 0;
-    }
-
-    if(n_word != 1)
-    {
-        printf("[%d line]: ERROR! Too many structs or there is extra space between letters: %s", n_line, line);
-        free(buffer);
-        return 0;
-    }
-
-
-    structLetters(buffer); //регистр
-
-    if(!(figureNameCheck(buffer, n_line, structs)))
-    {
-        free(buffer);  
-        return 0;
-    }
- 
-
-    
-    for(int j = 0; (line[pointer] != '\n'); pointer++)
-    {
-        if(line[pointer] == '\0')
+        else
         {
-            break;
+            sum -= point[i][1] * point[0][0];
         }
-
-        if(line[pointer] == '(')
-        {
-            o_brackets++;
-            continue;
-        }
-
-        if(line[pointer] == ')')
-        {
-            c_brackets++;
-            continue;
-        }
-
-        buffer[j] = line[pointer];
-        j++;
-
     }
+    sum = fabs(sum);
+    return 0.5 * sum;
+}
 
+struct figure
+{
+    int number; // (1. - n.)...
+    char* figure_type; //triangle, circle, polygon...
+    char* head; // figure((point x, point y), (point x, point y), (point x, point y) ... ) from WKT-format file that is entered by terminal
+    double** points; //array of {(x1, y1), (x2, y2), (x3, y3)...(xn, yn)}
+    double radius;
+    int n_points;
+    float perimetr; 
+    float square; 
+};
 
-    if(c_brackets != o_brackets)
+int circle_intersection(struct figure circle1, struct figure circle2)
+{
+    double sum_radius, sum;
+    sum_radius = circle1.radius + circle2.radius;
+    sum = sqrt(pow(circle1.points[0][0] - circle2.points[0][0], 2) + pow(circle2.points[0][1] - circle2.points[0][1], 2));
+    if (sum <= sum_radius)
     {
-        printf("[%d line]: ERROR! Lost \'(\' or \')\': %s", n_line, line);
-        free(buffer);
+        return 1;
+    } else
+    {
         return 0;
     }
+}
 
-    if(!(checkCircleNum(buffer, n_line)))
+int type_is(char* string)
+{
+    if (!(strcmp(string, "circle")))
     {
-        printf("[%d line]: ERROR! Parametr problem: %s", n_line, line);
-        free(buffer);
-        return 0;
+        return 3;
     }
+    if (!(strcmp(string, "triangle")))
+    {
+        return 4;
+    }
+    return 0;
 
-    free(buffer);
-    return 1;
 }
 
 
 
 
 int main(int argc, char* argv[])
-{
+{   
 
     if (argc != 2) {
-        printf("You have not entered the FILE\n");
+        printf("You have not entered FILE\n");
         return 1;
     }
 
     FILE* file;
     file = fopen(argv[1], "r");
-
     if (file == NULL) {
         printf("Couldn't open the FILE\n");
         return 2;
     }
-    int n_line = 0;
-    char line[256];
-    while((fgets(line, 256, file))!=NULL)
+
+    int input_size = 100;
+
+    char* input = malloc(input_size * sizeof(char)); // information from file
+    struct figure* figures = malloc(1 * sizeof(struct figure)); // make array of structs
+
+    int index_of_struct = 0;
+    int num = 1;
+    int figure_type_index;
+
+    while ((input = fgets(input, input_size, file)) != NULL)
     {
-        n_line ++;
-        if(!(checkLine(line, n_line)))
+        if(checkLine(input, num))
         {
+            char* token = "((, ),(, ),(, ))";
+            figures = realloc(figures, (index_of_struct + 1)* sizeof(struct figure)); // remake array of structs of figures
+            char str[strlen(input)];
+            strcpy(str, input);
+            char* i_str;
+            //узнаём тип фигуры
+            i_str = strtok(str, token);
+            figures[index_of_struct].figure_type = malloc(strlen(i_str) * sizeof(char));
+            str[strlen(str)] = '\0';
+            figures[index_of_struct].head = malloc(strlen(str) * sizeof(char));
+            strcpy(figures[index_of_struct].head, str);
+            figures[index_of_struct].number = num;
 
-        }
-        else 
-        {
-            printf("[%d line]: Everyting is okay\n", n_line);
-        }
+            strcpy(figures[index_of_struct].figure_type, i_str);
 
+            structLetters(figures[index_of_struct].figure_type); //регистр
+
+            figure_type_index = type_is(figures[index_of_struct].figure_type);
+            if (figure_type_index == 0)
+            {
+                printf("Figure type doesn't exit\n");
+                return 3;
+            }
+
+            figures[index_of_struct].points = (double**)malloc(1 * sizeof(double*)); //выделяем память под массив координат (пока что под одну пару);
+    
+            figures[index_of_struct].n_points = 0;
+
+
+            if(figure_type_index == 3) //круг (две точки + радиус)
+            {
+                token = "( ,)";
+                int i = 0;
+                while (i_str != NULL)
+                {   
+                    figures[index_of_struct].points[i] = (double*)malloc(2 * sizeof(double)); //выделяем память под пару координат;
+                    i_str = strtok(NULL, token);
+                    if(i_str != NULL)
+                    {
+                    figures[index_of_struct].points[i][0] = atof(i_str);
+                    }
+                    i_str = strtok(NULL, token);
+                    if(i_str != NULL)
+                    {
+                    figures[index_of_struct].points[i][1] = atof(i_str);
+                    }
+                    i++;
+                    i_str = strtok(NULL, token);
+                    
+                    if(i_str != NULL)
+                    {
+                    figures[index_of_struct].radius = atof(i_str); //радиус записываем, как третью координату 
+                    }
+
+                    figures[index_of_struct].points = (double**)realloc(figures[index_of_struct].points, (i + 1) * sizeof(double*));
+                    figures[index_of_struct].n_points++ ;
+                }
+            }
+
+            if(figure_type_index == 4 || figure_type_index == 5) //трегольник    
+            {
+                token = "( , )";
+                int i = 0;
+                while (i_str != NULL)
+                {   
+                    figures[index_of_struct].points[i] = (double*)malloc(2 * sizeof(double)); //выделяем память под пару координат;
+                    i_str = strtok(NULL, token);
+                    if(i_str != NULL)
+                    {
+                    figures[index_of_struct].points[i][0] = atof(i_str);
+                    }
+                    i_str = strtok(NULL, token);
+                    if(i_str != NULL)
+                    {
+                    figures[index_of_struct].points[i][1] = atof(i_str);
+                    }
+                    i++;
+
+                    figures[index_of_struct].points = (double**)realloc(figures[index_of_struct].points, (i + 1) * sizeof(double*));
+                    figures[index_of_struct].n_points ++ ;
+                }
+            }
+
+            figures[index_of_struct].n_points--;
+
+            switch(figure_type_index)
+            {
+                case 3:
+                    figures[index_of_struct].perimetr = circle_per(figures[index_of_struct].radius);
+                    figures[index_of_struct].square = circle_square(figures[index_of_struct].radius);
+                    break;
+                case 4:
+                    figures[index_of_struct].perimetr = polygon_tri_per(figures[index_of_struct].points, figures[index_of_struct].n_points);
+                    figures[index_of_struct].square = polygon_tri_square(figures[index_of_struct].points, figures[index_of_struct].n_points);
+                    break;
+            }
+
+            //print
+            printf("[%d line] ", num);
+            printf("%s\n", figures[index_of_struct].figure_type);
+            printf("Perimetr: %f\n", figures[index_of_struct].perimetr);
+            printf("Square: %f\n", figures[index_of_struct].square);
+            printf("Number of points: %d\n", figures[index_of_struct].n_points);
+
+            if (!(strcmp(figures[index_of_struct].figure_type, "circle")))
+            {
+                printf("Radius: %f\n", figures[index_of_struct].radius);
+            }
+        
+            for(int i = 0; i < figures[index_of_struct].n_points; i++)
+            {
+                printf("{%.2f, %.2f} ", figures[index_of_struct].points[i][0], figures[index_of_struct].points[i][1]);
+            }
+            printf("\n\n");
+            index_of_struct++;
+        }
+        index_of_struct++;
+        num++;
     }
 
-    fclose(file);
-  }
+
+
+    return 0;
+
+} 
