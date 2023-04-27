@@ -4,7 +4,7 @@
 #include <ctype.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "try.h"
+#include "checkFunctions.h"
 
 
 float circle_per(float radius)
