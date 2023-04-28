@@ -12,13 +12,7 @@ bin/main.o: src/geometry/main.c
 bin/geometrylib.a: bin/geometrylib.o
 	ar rsc $@ $^
 
-bin/parser.a: bin/parser.o
-	ar rsc $@ $^
-
 bin/checkFunctions.o: src/geometrylib/checkFunctions.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
-
-bin/parser.o: src/geometrylib/parser.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
 
 clean:
