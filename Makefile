@@ -5,6 +5,7 @@ CPPFLAGS = -MMD
 
 bin/main: bin/main.o bin/geometrylib.a 
 	$(CC) $(CFLAGS) -o $@ $^
+	example
 
 bin/main.o: src/geometry/main.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $< -I src
@@ -14,8 +15,6 @@ bin/geometrylib.a: bin/geometrylib.o
 
 bin/geometrylib.o: src/geometrylib/geometrylib.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
-	
-bin/main:  bin/main example
 
 clean:
 	rm -rf bin/*.o
