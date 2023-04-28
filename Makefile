@@ -1,9 +1,9 @@
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -lm
 CPPFLAGS = -MMD
 
 .PHONY: clean
 
-bin/main: bin/main.o bin/geometrylib.a bin/parser.a
+bin/main: bin/main.o bin/geometrylib.a 
 	$(CC) $(CFLAGS) -o $@ $^
 
 bin/main.o: src/geometry/main.c
@@ -12,12 +12,13 @@ bin/main.o: src/geometry/main.c
 bin/geometrylib.a: bin/geometrylib.o
 	ar rsc $@ $^
 
-bin/checkFunctions.o: src/geometrylib/checkFunctions.h
+bin/geometrylib.o: src/geometrylib/geometrylib.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
 
 clean:
 	rm -rf bin/*.o
 	rm -rf bin/*.d
 	rm -rf bin/*.a
+	rm -rf bin/main
 	
 -include bin/main.d bin/geometrylib.d
