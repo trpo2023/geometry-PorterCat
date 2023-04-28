@@ -14,6 +14,8 @@ bin/geometrylib.a: bin/geometrylib.o
 
 bin/geometrylib.o: src/geometrylib/geometrylib.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
+	
+bin/main example.wkt
 
 clean:
 	rm -rf bin/*.o
@@ -23,5 +25,3 @@ clean:
 	
 -include bin/main.d bin/geometrylib.d
 
-run:
-	bin/main example.wkt
