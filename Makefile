@@ -22,3 +22,6 @@ clean:
 	rm -rf bin/main
 	
 -include bin/main.d bin/geometrylib.d
+
+run:
+	bin/main example.wkt
