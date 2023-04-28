@@ -5,7 +5,7 @@ CPPFLAGS = -MMD
 
 bin/main: bin/main.o bin/geometrylib.a 
 	$(CC) $(CFLAGS) -o $@ $^
-	src/examples/example	
+	$< src/examples/example	
 	
 bin/main.o: src/geometry/main.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $< -I src
